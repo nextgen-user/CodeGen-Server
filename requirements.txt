@@ -18,3 +18,5 @@ markdown
 moviepy
 yfinance
 requests
+duckduckgo_search
+asyncio
