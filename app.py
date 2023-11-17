@@ -6,6 +6,8 @@ from flask import Flask, request, url_for, redirect
 from werkzeug.utils import secure_filename
 import os
 import asyncio
+import traceback
+import json
 
 
 # Files stored in
@@ -32,7 +34,7 @@ def execute():
         exec(code,globals())  
     except Exception as e:
         print(e)
-        return {"Error":str(e)}
+        return {"Error":json.dumps(str(traceback.format_exc()))}
     return data
 
 @app.route('/', methods=['GET','POST'])
