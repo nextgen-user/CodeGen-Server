@@ -1,26 +1,27 @@
-import asyncio
 import random
-from duckduckgo_search import AsyncDDGS
 import urllib.request
-
+import requests
+import time
+import urllib.request
 imgur=[]
-
 def getimage(query):
 
-    async def get_results():
-        global imgur
-        async with AsyncDDGS() as ddgs:
-            async for r in ddgs.images(query, max_results=20):
-                imgur.append(r["image"])
+    payload = {
+        "model": "absolutereality_v181.safetensors [3d9d4d2b]",
+        "prompt": str(query)
+    }
 
-    asyncio.run(get_results())
-    print(imgur)
-    for i in range(1,10):
-        try:
-            filename=f"static/image{random.randint(1,1000)}.jpg"
-            urllib.request.urlretrieve(random.choice(imgur), filename)
-            print(filename)
+    response = requests.post("https://api.prodia.com/v1/sd/generate", json=payload, headers={"accept": "application/json","content-type": "application/json","X-Prodia-Key": "da6053eb-c352-4374-a459-2a9a5eaaa64b"})
+    jobid=response.json()["job"]
+    while True:
+        response = requests.get(f"https://api.prodia.com/v1/job/{jobid}", headers={"accept": "application/json","X-Prodia-Key": "da6053eb-c352-4374-a459-2a9a5eaaa64b"})
+        if response.json()["status"]=="succeeded":
+            image=response.json()["imageUrl"]
             break
-        except:
-            pass
+        time.sleep(0.5)
+
+    filename=f"static/image{random.randint(1,1000)}.png"
+
+    urllib.request.urlretrieve(image, filename)
+
     return filename
